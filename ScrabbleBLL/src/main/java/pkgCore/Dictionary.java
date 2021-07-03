@@ -77,10 +77,44 @@ public class Dictionary {
 	 * @return
 	 */
 	public HashSet<Word> findWords(String strWord) {
-		HashSet<Word> FoundWords = new HashSet<Word>();
+		HashSet<Word> FoundWords = new HashSet<Word>();		
+		strWord = strWord.toUpperCase();
+		int idxStart = 0;
+		int idxEnd = 0;
+
+		// If the word doesn't contain wild card, try to find the word
+		if (!strWord.contains("?") && (!strWord.contains("*"))) {
+			Word w = this.findWord(strWord);
+			if (w != null)
+				FoundWords.add(w);
+		} else {
+			if ((strWord.substring(0, 1).equals("?") || strWord.substring(0, 1).equals("*"))
+					&& (strWord.length() > 1)) {
+
+				for (Character c : this.alphaBet) {
+					if (strWord.length() > 1) {
+						String strNewWord = c + strWord.substring(1, strWord.length());
+						FoundWords.addAll(findWords(strNewWord));
+					}
+				}
+				return FoundWords;
+			}
+
+			idxStart = FindBeginningIndex(this.words, strWord);
+			idxEnd = FindEndingIndex(this.words, strWord);
+
+			for (; idxStart < idxEnd; idxStart++) {
+				iCntLoop++;
+				Word w = this.words.get(idxStart);
+				if (this.match(strWord, w.getWord()) && w.getWord().isBlank() != true
+						&& w.getWord().isEmpty() != true) {
+					FoundWords.add(w);
+				}
+			}
+		}
 		return FoundWords;
 	}
-	
+
 	/**
 	 * FindBeginningIndex - The intention of this method is to find the best place
 	 * in the dictionary to start searching. No sense in looking through the entire
@@ -97,8 +131,37 @@ public class Dictionary {
 	 * @return
 	 */
 	private int FindBeginningIndex(ArrayList<Word> arrSearch, String strPartialWord) {
-		return 0;
+
+		String strFilterStart = null;
+		int idxStart = 0;
+
+		// Determine the Partial Word (word up to the wildcard)
+		if (strPartialWord.contains("?")) {
+			strFilterStart = strPartialWord.substring(0, strPartialWord.indexOf('?'));
+		} else if (strPartialWord.contains("*")) {
+			strFilterStart = strPartialWord.substring(0, strPartialWord.indexOf('*'));
+		} else {
+			strFilterStart = strPartialWord;
+		}
+
+		if (strPartialWord.equals("?") || strPartialWord.equals("*")) {
+			idxStart = 0;
+		} else if (strFilterStart.isBlank() || strFilterStart.isEmpty()) {
+			idxStart = 0;
+		} else {
+			Word wFind = new Word(strFilterStart);
+			idxStart = Collections.binarySearch(arrSearch, wFind, Word.CompWord);
+			if (idxStart == -1)
+				idxStart = 0;
+			else if (idxStart < 0) {
+				idxStart = Math.abs(idxStart) - 2;
+			}
+			if (idxStart < 0)
+				idxStart = 0;
+		}
+		return idxStart;
 	}
+
 	/**
 	 * FindEndingIndex - The intention of this method is to find the best place in
 	 * the dictionary to end searching.
@@ -119,7 +182,45 @@ public class Dictionary {
 	 * @return
 	 */
 	private int FindEndingIndex(ArrayList<Word> arrSearch, String strPartialWord) {
-		return 0;
+
+		String strStartWord = "";
+		String strEndWord = null;
+		Character chLast;
+
+		if (strPartialWord.length() == 1) {
+			return arrSearch.size() - 1;
+		}
+
+		if (strPartialWord.contains("?")) {
+			strStartWord = strPartialWord.substring(0, strPartialWord.indexOf('?') + 1);
+			strStartWord = strStartWord.replace("?", "Z");
+			strEndWord = strPartialWord.substring(strPartialWord.indexOf('?') + 1);
+		} else if (strPartialWord.contains("*")) {
+			strStartWord = strPartialWord.substring(0, strPartialWord.indexOf('*') + 1);
+			strStartWord = strStartWord.replace("*", "Z");
+			strEndWord = strPartialWord.substring(strPartialWord.indexOf('*') + 1);
+
+		} else {
+			strEndWord = strPartialWord;
+		}
+
+		if ((strEndWord + strStartWord).isBlank() || (strStartWord + strEndWord).isEmpty())
+			return arrSearch.size();
+
+		if (!strEndWord.isBlank() || !strEndWord.isEmpty()) {
+			chLast = strEndWord.charAt(strEndWord.length() - 1);
+			chLast++;
+			strEndWord = strEndWord.substring(0, strEndWord.length() - 1);
+			strEndWord = strStartWord + strEndWord + chLast;
+		} else {
+			strEndWord = strStartWord;
+		}
+
+		Word w = new Word(strEndWord);
+		int idx = Collections.binarySearch(arrSearch, w, Word.CompWord);
+
+		return Math.abs(idx + 1);
+
 	}
  
 
