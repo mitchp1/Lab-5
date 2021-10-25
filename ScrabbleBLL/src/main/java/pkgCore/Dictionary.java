@@ -224,43 +224,50 @@ public class Dictionary {
 		return Math.abs(idx + 1);
 
 	}
+	
+	
+	
 	public ArrayList<Word> GenerateWords(String strLetters, WordFilter WF){
-		ArrayList<Word> arrGenerateWords = this.GenerateWords(strLetters);
+		
+		
+		ArrayList<Word> arrGeneratedWords = this.GenerateWords(strLetters);
+		
 		
 		if (WF.getiLength() > 0) {
-			arrGenerateWords = (ArrayList<Word>) arrGenerateWords.stream()
+			arrGeneratedWords = (ArrayList<Word>) arrGeneratedWords.stream()
 					.filter(x -> x.getWord().length()== WF.getiLength())
 					.collect(Collectors.toList());
 		}
 		
 		if (WF.getStrStartWith() != null) {
-			arrGenerateWords = (ArrayList<Word>) arrGenerateWords.stream()
+			arrGeneratedWords = (ArrayList<Word>) arrGeneratedWords.stream()
 					.filter(x -> x.getWord()
 					.startsWith(WF.getStrStartWith()))
 					.collect(Collectors.toList());
 		}
 		
 		if (WF.getStrEndWith() != null) {
-			arrGenerateWords = (ArrayList<Word>) arrGenerateWords.stream()
+			arrGeneratedWords = (ArrayList<Word>) arrGeneratedWords.stream()
 					.filter(x -> x.getWord().endsWith(WF.getStrEndWith()))
 					.collect(Collectors.toList());
 		}
 		
 		if (WF.getStrContains() != null) {
-			if (WF.getiContainsidx() == -1)
-				arrGenerateWords = (ArrayList<Word>) arrGenerateWords.stream()
+			if (WF.getiContainsIdx() == -1)
+				arrGeneratedWords = (ArrayList<Word>) arrGeneratedWords.stream()
 				          .filter(x -> x.getWord()
 				          .contains(WF.getStrContains()))
 				          .collect(Collectors.toList());
 			
-			else if (WF.getiContainsidx() >= 0) {
-				arrGenerateWords = (ArrayList<Word>) arrGenerateWords.stream()
+			else if (WF.getiContainsIdx() >= 0) {
+				arrGeneratedWords = (ArrayList<Word>) arrGeneratedWords.stream()
 						.filter(x -> x.getWord().contains(WF.getStrContains()))
-						.filter(y -> y.getWord().indexOf(WF.getStrEndWith().StrContains()) == WF.getStrStartWith()
-						.collect(Collectors.toList()));
+						.filter(y -> y.getWord().indexOf(WF.getStrContains()) == WF.getiContainsIdx())
+						.collect(Collectors.toList());
 			}
 				
 		}
+		return arrGeneratedWords;
 	}
 	/**
 	 * GenerateWords - Public facing method. If you call this with a string, it will
@@ -289,7 +296,15 @@ public class Dictionary {
 		HashSet<Word> hsUniqueWords = new HashSet<Word>(GeneratePossibleWords(combinWords));
 		ArrayList<Word> WordsPermut = new ArrayList<Word>(hsUniqueWords);
 		Collections.sort(WordsPermut, Word.CompWord);
-		return WordsPermut;
+		
+		ArrayList<Word> ActualWords = new ArrayList<Word>();
+		
+		for (Word w: WordsPermut)
+		{
+			if (this.findWord(w.getWord()) != null)
+				ActualWords.add(w);
+		}
+		return ActualWords;
 	}
 
 	/**
