@@ -11,6 +11,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
+import pkgCore.WordFilter;
 
 import org.apache.commons.math3.util.CombinatoricsUtils;
 
@@ -222,8 +224,44 @@ public class Dictionary {
 		return Math.abs(idx + 1);
 
 	}
- 
-
+	public ArrayList<Word> GenerateWords(String strLetters, WordFilter WF){
+		ArrayList<Word> arrGenerateWords = this.GenerateWords(strLetters);
+		
+		if (WF.getiLength() > 0) {
+			arrGenerateWords = (ArrayList<Word>) arrGenerateWords.stream()
+					.filter(x -> x.getWord().length()== WF.getiLength())
+					.collect(Collectors.toList());
+		}
+		
+		if (WF.getStrStartWith() != null) {
+			arrGenerateWords = (ArrayList<Word>) arrGenerateWords.stream()
+					.filter(x -> x.getWord()
+					.startsWith(WF.getStrStartWith()))
+					.collect(Collectors.toList());
+		}
+		
+		if (WF.getStrEndWith() != null) {
+			arrGenerateWords = (ArrayList<Word>) arrGenerateWords.stream()
+					.filter(x -> x.getWord().endsWith(WF.getStrEndWith()))
+					.collect(Collectors.toList());
+		}
+		
+		if (WF.getStrContains() != null) {
+			if (WF.getiContainsIdx() == -1)
+				arrGenerateWords = (ArrayList<Word>) arrGenerateWords.stream()
+				          .filter(x -> x.getWord()
+				          .contins(WF.getStrContains()))
+				          .collect(Collectors.toList());
+			
+			else if (WF.getiContainsIdx() >= 0) {
+				arrGenerateWords = (ArrayList<Word>) arrGenerateWords.stream()
+						.filter(x -> x.getWord().contains(WF.getStrContains()))
+						.filter(y -> y.getWord().indexOf(WF.getStrEndWith().StrContains()) == WF.getStrStartWith()
+						.collect(Collectors.toList()));
+			}
+				
+		}
+	}
 	/**
 	 * GenerateWords - Public facing method. If you call this with a string, it will
 	 * return the permutations of words that could be generated. There's no
@@ -233,7 +271,6 @@ public class Dictionary {
 	 * @param strLetters
 	 * @return
 	 */
-	
 	public ArrayList<Word> GenerateWords(String strLetters) {
 		ArrayList<String> combinWords = new ArrayList<String>();
 		for (int b = 1; b < strLetters.length() + 1; b++) {
@@ -247,6 +284,7 @@ public class Dictionary {
 				combinWords.add(strBuildWord);
 			}
 		}
+		
 
 		HashSet<Word> hsUniqueWords = new HashSet<Word>(GeneratePossibleWords(combinWords));
 		ArrayList<Word> WordsPermut = new ArrayList<Word>(hsUniqueWords);
@@ -265,6 +303,7 @@ public class Dictionary {
 	 * @param arrLetters
 	 * @return - unique list of Words.
 	 */
+	
 	private ArrayList<Word> GeneratePossibleWords(ArrayList<String> arrLetters) {
 		HashSet<Word> words = new HashSet<Word>();
 
