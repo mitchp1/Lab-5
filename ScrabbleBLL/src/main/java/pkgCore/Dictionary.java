@@ -247,13 +247,13 @@ public class Dictionary {
 		}
 		
 		if (WF.getStrContains() != null) {
-			if (WF.getiContainsIdx() == -1)
+			if (WF.getiContainsidx() == -1)
 				arrGenerateWords = (ArrayList<Word>) arrGenerateWords.stream()
 				          .filter(x -> x.getWord()
-				          .contins(WF.getStrContains()))
+				          .contains(WF.getStrContains()))
 				          .collect(Collectors.toList());
 			
-			else if (WF.getiContainsIdx() >= 0) {
+			else if (WF.getiContainsidx() >= 0) {
 				arrGenerateWords = (ArrayList<Word>) arrGenerateWords.stream()
 						.filter(x -> x.getWord().contains(WF.getStrContains()))
 						.filter(y -> y.getWord().indexOf(WF.getStrEndWith().StrContains()) == WF.getStrStartWith()
